@@ -13,7 +13,34 @@ const getTransporter = () =>
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
   });
+
+// GET email status (Diagnostic)
+router.get('/email-status', async (req, res) => {
+  try {
+    const transporter = getTransporter();
+    await transporter.verify();
+    res.json({
+      success: true,
+      message: 'SMTP connection verified successfully',
+      emailUser: process.env.EMAIL_USER ? `${process.env.EMAIL_USER.substring(0, 3)}...` : 'not set',
+      emailOwner: process.env.EMAIL_OWNER ? `${process.env.EMAIL_OWNER.substring(0, 3)}...` : 'not set',
+      emailPassSet: !!process.env.EMAIL_PASS,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'SMTP connection verification failed',
+      error: err.message,
+      emailUser: process.env.EMAIL_USER ? `${process.env.EMAIL_USER.substring(0, 3)}...` : 'not set',
+      emailOwner: process.env.EMAIL_OWNER ? `${process.env.EMAIL_OWNER.substring(0, 3)}...` : 'not set',
+      emailPassSet: !!process.env.EMAIL_PASS,
+    });
+  }
+});
 
 // GET all leads (Admin Dashboard)
 router.get('/', async (req, res) => {
