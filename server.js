@@ -17,13 +17,11 @@ dotenv.config();
 
 const app = express();
 
-// Middlewares — allow requests from local dev and Vercel production
+// Middlewares — allow origins from .env (FRONTEND_URL)
 const allowedOrigins = [
-  'http://localhost:3000',
-  'https://rudra-group.vercel.app',
-  // Allow any vercel preview URLs too
-  /^https:\/\/rudra-group.*\.vercel\.app$/,
-];
+  process.env.FRONTEND_URL,          // e.g. http://localhost:3000 or https://rudra-group.vercel.app
+  /^https:\/\/rudra-group.*\.vercel\.app$/, // any Vercel preview URLs
+].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
