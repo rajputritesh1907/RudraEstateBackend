@@ -17,8 +17,28 @@ dotenv.config();
 
 const app = express();
 
-// Middlewares
-app.use(cors());
+// Middlewares — allow requests from local dev and Vercel production
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://rudra-group.vercel.app',
+  // Allow any vercel preview URLs too
+  /^https:\/\/rudra-group.*\.vercel\.app$/,
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like Postman, server-to-server)
+    if (!origin) return callback(null, true);
+    const isAllowed = allowedOrigins.some((o) =>
+      typeof o === 'string' ? o === origin : o.test(origin)
+    );
+    if (isAllowed) return callback(null, true);
+    return callback(new Error(`CORS policy: Origin ${origin} not allowed`));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
 app.use(express.json());
 
 // Routes
