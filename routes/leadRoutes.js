@@ -1,6 +1,9 @@
 import express from 'express';
 import nodemailer from 'nodemailer';
+import dns from 'dns';
 import Lead from '../models/Lead.js';
+
+dns.setDefaultResultOrder('ipv4first');
 
 const router = express.Router();
 
