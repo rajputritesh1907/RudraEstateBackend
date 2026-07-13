@@ -33,14 +33,12 @@ app.get('/', (req, res) => {
   res.send('Rudra Group Backend API is running successfully.');
 });
 
-// Seed Database Helper
 const seedDatabase = async () => {
   try {
-    const projectCount = await Project.countDocuments();
-    if (projectCount === 0) {
-      console.log('Seeding initial projects into MongoDB Atlas...');
-      const seedProjects = [
-        {
+    console.log('Re-seeding initial projects into MongoDB Atlas...');
+    await Project.deleteMany({});
+    const seedProjects = [
+      {
           title: "Orchid River View",
           phase: "Phase I",
           status: "Active",
@@ -121,13 +119,12 @@ const seedDatabase = async () => {
           sizeRange: "10,000 - 50,000 sq.ft.",
           amenities: ["220KV Power Supply", "Heavy Transport Access Roads", "Effluent Disposal Line", "Gas Pipelines Connection"],
           highlights: ["Ideal for Warehouses/Manufacturing", "Next to Multi-Modal Logistics Hub", "Easy Government Approvals"],
-          image: "https://images.unsplash.com/photo-1530606901857-6c97d167f13a?auto=format&fit=crop&w=800&q=80",
+          image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80",
           featured: false
         }
       ];
       await Project.insertMany(seedProjects);
       console.log('Seeded projects successfully.');
-    }
 
     const blogCount = await Blog.countDocuments();
     if (blogCount === 0) {
@@ -214,6 +211,44 @@ const seedDatabase = async () => {
     ];
     await Testimonial.insertMany(seedTestimonials);
     console.log('Seeded 6 testimonials successfully.');
+
+    // Ensure PreLaunch items are seeded and rebranded
+    console.log('Seeding initial pre-launch items into MongoDB Atlas...');
+    await PreLaunch.deleteMany({});
+    const seedPreLaunches = [
+      {
+        heading: 'Orchid Sky Residences — Phase III',
+        description: 'The most anticipated villa township in Dholera SIR is coming — featuring sky-facing terraces, private swimming pools, ultra-smart home systems, and direct expressway access. Register your interest now to get early-bird pricing.',
+        image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
+        launchDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+        category: 'Residential',
+        location: 'TPS-2, Dholera SIR',
+        priceRange: '₹45 Lakh – ₹1.2 Cr',
+        isActive: true
+      },
+      {
+        heading: 'Rudra Commerce Hub — CBD Block A',
+        description: 'Prime commercial plots in the Central Business District of Dholera SIR, adjacent to the proposed metro station and expressway interchange. Designed for retail anchors, corporate headquarters, and hospitality ventures.',
+        image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
+        launchDate: new Date(Date.now() + 32 * 24 * 60 * 60 * 1000).toISOString(),
+        category: 'Commercial',
+        location: 'CBD Zone, Dholera SIR',
+        priceRange: '₹80 Lakh – ₹3.5 Cr',
+        isActive: true
+      },
+      {
+        heading: 'Industrial Mega Park — Sector 6',
+        description: 'Large-format industrial parcels built for heavy manufacturing, warehouse logistics, and tier-1 industrial supply chain operations. Located near the proposed freight corridor and Dholera International Airport. DMIC-eligible investment zones.',
+        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+        launchDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+        category: 'Industrial',
+        location: 'Sector 6, Dholera SIR',
+        priceRange: '₹1.5 Cr – ₹8 Cr',
+        isActive: true
+      }
+    ];
+    await PreLaunch.insertMany(seedPreLaunches);
+    console.log('Seeded pre-launch items successfully.');
   } catch (error) {
     console.error('Error seeding database:', error.message);
   }

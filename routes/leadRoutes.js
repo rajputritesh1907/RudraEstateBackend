@@ -100,14 +100,38 @@ router.post('/', async (req, res) => {
       `,
     };
 
-    // Send both emails — if either fails, return error to client
+    // Send both emails — sequentially to prevent Gmail concurrent connection locks
+    let ownerMailSent = false;
+    let userMailSent = false;
+    let mailErrors = [];
+
     try {
       const transporter = getTransporter();
-      await Promise.all([
-        transporter.sendMail(ownerMailOptions),
-        transporter.sendMail(userMailOptions),
-      ]);
-      console.log(`✅ Emails sent for lead: ${name} (${email})`);
+
+      // 1. Send owner notification
+      try {
+        await transporter.sendMail(ownerMailOptions);
+        ownerMailSent = true;
+        console.log(`✅ Owner notification sent to: ${process.env.EMAIL_OWNER}`);
+      } catch (err) {
+        console.error('❌ Owner notification failed:', err.message);
+        mailErrors.push(`Owner: ${err.message}`);
+      }
+
+      // 2. Send user thank you
+      try {
+        await transporter.sendMail(userMailOptions);
+        userMailSent = true;
+        console.log(`✅ User thank you email sent to: ${email}`);
+      } catch (err) {
+        console.error('❌ User thank you email failed:', err.message);
+        mailErrors.push(`User: ${err.message}`);
+      }
+
+      // If both failed, we raise an error
+      if (!ownerMailSent && !userMailSent) {
+        throw new Error('Both emails failed to deliver: ' + mailErrors.join(' | '));
+      }
     } catch (mailError) {
       console.error('❌ Email sending failed:', mailError.message);
       // Delete the saved lead so the user can try again
